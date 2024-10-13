@@ -20,6 +20,7 @@
 
 #include <chrono>
 #include <functional>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
