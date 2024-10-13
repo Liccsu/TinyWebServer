@@ -1,0 +1,194 @@
+<!--
+  ~ Copyright (c) -2024
+  ~ Liccsu
+  ~ All rights reserved.
+  ~
+  ~ This software is provided under the terms of the GPL License.
+  ~ Please refer to the accompanying LICENSE file for detailed information.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  ~ GPL License for more details.
+  ~
+  ~ For further inquiries, please contact:
+  ~ liccsu@163.com
+  -->
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>400 错误 - 错误请求</title>
+    <style>
+        /* 重置一些默认样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding-top: 60px; /* 为固定导航栏预留空间 */
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed; /* 固定在顶部 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            overflow: hidden;
+            z-index: 1001; /* 确保导航栏在内容之上 */
+        }
+
+        .navbar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center; /* 居中对齐导航项 */
+        }
+
+        .navbar li {
+            float: left;
+        }
+
+        .navbar li a {
+            display: block;
+            color: #f2f2f2;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar li a:hover {
+            background-color: #ddd;
+            color: #333;
+        }
+
+        /* 错误页面主体样式 */
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-code {
+            font-size: 100px;
+            font-weight: bold;
+            color: #ff6347; /* 亮橙色，用于强调 */
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .error-description {
+            font-size: 18px;
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .error-actions a {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: #ff6347;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: background-color 0.3s;
+            margin: 0 10px;
+        }
+
+        .error-actions a:hover {
+            background-color: #ff4500;
+        }
+
+        /* 页脚样式 */
+        .footer {
+            padding: 20px;
+            text-align: center;
+            background-color: #333;
+            color: #f2f2f2;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 60px;
+            }
+
+            .error-message {
+                font-size: 20px;
+            }
+
+            .error-description {
+                font-size: 16px;
+            }
+
+            .error-actions a {
+                padding: 10px 25px;
+                font-size: 16px;
+                margin: 5px 0;
+            }
+
+            .error-container {
+                height: auto;
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar">
+    <ul>
+        <li><a href="index.html">首页</a></li>
+        <li><a href="picture.html">图库</a></li>
+        <li><a href="video.html">视频</a></li>
+        <li><a href="login.html">登陆</a></li>
+    </ul>
+</nav>
+
+<!-- 错误页面主体 -->
+<div class="error-container">
+    <div class="error-code">400</div>
+    <div class="error-message">错误请求</div>
+    <div class="error-description">
+        您的请求有误，服务器无法理解。请检查您的请求是否正确，或返回首页重新尝试。
+    </div>
+    <div class="error-actions">
+        <a href="index.html">返回首页</a>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="footer">
+    <p>&copy; 2024 我的网站. 版权所有。</p>
+</footer>
+
+</body>
+</html>
