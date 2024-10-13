@@ -24,6 +24,11 @@
 
 #include "LogStream.hpp"
 
+// 部分编译器不支持 __FILE_NAME__ 宏
+#ifndef __FILE_NAME__
+#define __FILE_NAME__ __FILE__
+#endif
+
 enum class LogLevel {
     Default,
     Debug,
