@@ -19,6 +19,7 @@
 #define TINYWEBSERVER_HTTPCONNECTION_H
 
 #include <mutex>
+#include <tuple>
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
