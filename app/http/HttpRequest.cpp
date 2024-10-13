@@ -125,28 +125,43 @@ void HttpRequest::parseContent(const std::string &line) {
 }
 
 void HttpRequest::parsePost() {
-    if (method_ == Method::Post && headers_["Content-Type"] == "application/x-www-form-urlencoded") {
+    std::string contentType;
+    auto it = headers_.find("Content-Type");
+    if (it == headers_.end()) {
+        it = headers_.find("content-type");
+        if (it == headers_.end()) {
+            return;
+        }
+    }
+    if (method_ == Method::Post && it->second == "application/x-www-form-urlencoded") {
         // 解析 POST 请求参数
         parseFromUrlEncoded();
         // 如果是登录/注册的path
         if (path_ == "/login.html") {
+            LOGI << "User login: " << path_;
             if (userVerify(posts_["username"], posts_["password"], true)) {
                 // 登陆成功
+                LOGI << "User login success";
                 path_ = "/index.html";
             } else {
                 // 出错
+                LOGW << "User login failed";
                 path_ = "/error.html";
             }
         } else if (path_ == "/register.html") {
+            LOGI << "User register" << path_;
             if (userVerify(posts_["username"], posts_["password"], false)) {
                 // 注册成功
+                LOGI << "User register success";
                 path_ = "/index.html";
             } else {
                 // 出错
+                LOGW << "User register failed";
                 path_ = "/error.html";
             }
         } else {
             // 出错
+            LOGW << "Unknown POST requests";
             path_ = "/error.html";
         }
     }
@@ -461,7 +476,7 @@ std::string HttpRequest::getPost(const char *key) const {
 
 bool HttpRequest::isKeepAlive() const {
     if (const auto it = headers_.find("Connection"); it != headers_.end()) {
-        return it->second == "keep-alive" && version_ == Version::Http11;
+        return (it->second == "keep-alive" || it->second == "Keep-Alive") && version_ == Version::Http11;
     }
     LOGW << "Connection header not found";
     return false;
