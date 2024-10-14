@@ -99,9 +99,9 @@ SqlConnPool::Connection SqlConnPool::_getConnection() {
         usedConn_.emplace_back(conn);
         return {conn, *this};
     }
-    // 如果没有空闲的连接
+    // 如果没有空闲的连接且当前连接池大小小于设定的最大连接池大小
     if (currentPoolSize_ < maxPoolSize_) {
-        // 动态扩展连接池
+        // 则动态扩展连接池
         if (MysqlPtr newConn = createConnection()) {
             MYSQL *rawConn = newConn.release();
             ++currentPoolSize_;
@@ -171,14 +171,7 @@ bool SqlConnPool::ensureDatabase() const {
 
 void SqlConnPool::monitorPool() {
     while (!shutdown_) {
-        // 每60秒检查一次
-        std::this_thread::sleep_for(std::chrono::seconds(60));
-
         std::unique_lock lock(poolMutex_);
-        if (shutdown_) {
-            break;
-        }
-
         // 健康检查：检查可用连接
         std::queue<MYSQL *> tempQueue;
         while (!connQue_.empty()) {
@@ -221,6 +214,9 @@ void SqlConnPool::monitorPool() {
         }
 
         // TODO: 如果某一段时间内连接使用率超过阈值，则增加连接数
+
+        // 每60秒检查一次
+        std::this_thread::sleep_for(std::chrono::seconds(60));
     }
 }
 

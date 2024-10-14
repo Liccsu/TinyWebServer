@@ -18,64 +18,6 @@
 #ifndef TINYWEBSERVER_SQLCONNPOOL_HPP
 #define TINYWEBSERVER_SQLCONNPOOL_HPP
 
-// #include <semaphore>
-// #include <string>
-// #include <thread>
-// #include <mysql/mysql.h>
-//
-// #include "BlockingQueue.hpp"
-//
-// class SqlConnPool {
-//     int MAX_CONN_{};
-//
-//     std::queue<MYSQL *> connQue_;
-//     std::mutex mtx_;
-//     // 使用 std::optional 延迟初始化计数信号量
-//     // 计数信号量，C++20支持
-//     std::optional<std::counting_semaphore<> > semaphore;
-//
-//     SqlConnPool() = default;
-//
-//     ~SqlConnPool() {
-//         closePool();
-//     }
-//
-// public:
-//     static SqlConnPool *instance();
-//
-//     MYSQL *getConnection();
-//
-//     void freeConnection(MYSQL *conn);
-//
-//     size_t getFreeConnectionCount();
-//
-//     void init(const std::string &host, uint16_t port,
-//               const std::string &user, const std::string &pwd,
-//               const std::string &dbName, int connSize);
-//
-//     void closePool();
-// };
-//
-// // 资源在对象构造初始化 资源在对象析构时释放
-// class SqlConnRAII {
-//     MYSQL *sql_;
-//     SqlConnPool *connPool_;
-//
-// public:
-//     SqlConnRAII(MYSQL **sql, SqlConnPool *connPool) {
-//         assert(connPool);
-//         *sql = connPool->getConnection();
-//         sql_ = *sql;
-//         connPool_ = connPool;
-//     }
-//
-//     ~SqlConnRAII() {
-//         if (sql_) {
-//             connPool_->freeConnection(sql_);
-//         }
-//     }
-// };
-
 #include <condition_variable>
 #include <list>
 #include <memory>
@@ -181,6 +123,7 @@ class SqlConnPool {
 
     // 当前连接池大小
     int currentPoolSize_{};
+    // 空闲可用的连接数量
     int availableConnections_{};
 
     SqlConnPool();
@@ -215,7 +158,7 @@ public:
     }
 };
 
-// 示例使用
+// 数据库连接池测试
 // #include <iostream>
 // int main() {
 //     try {
