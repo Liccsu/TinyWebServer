@@ -35,6 +35,7 @@ class Buffer {
         return &buffer_[0];
     }
 
+    [[maybe_unused]]
     [[nodiscard]]
     const char *beginPtr() const {
         return &buffer_[0];
@@ -44,16 +45,18 @@ class Buffer {
     void extend(size_t len);
 
 public:
-    Buffer(): Buffer(64 * 1024) {
+    Buffer() :
+            Buffer(64 * 1024) {
+    }
+
+    explicit Buffer(const size_t initSize) :
+            buffer_(initSize) {
     }
 
     // 禁止拷贝
     Buffer(const Buffer &) = delete;
 
     Buffer &operator=(const Buffer &) = delete;
-
-    explicit Buffer(const size_t initSize) : buffer_(initSize) {
-    }
 
     ~Buffer() = default;
 
@@ -83,11 +86,8 @@ public:
     // 将一个缓冲区的未读数据追加到此缓冲区的未读数据之后
     void append(const Buffer &buffer);
 
-    // 从fd文件中读取数据到缓冲区，即往缓冲区中写入数据
+    // 从fd文件中读取数据到缓冲区
     auto readFd(int fd) -> std::tuple<ssize_t, int>;
-
-    // 写入数据到fd文件
-    auto writeFd(int fd) -> std::tuple<ssize_t, int>;
 
     // 可写区域起始地址
     [[nodiscard]]

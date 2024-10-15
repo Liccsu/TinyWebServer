@@ -51,16 +51,18 @@ class Logger {
         LogStream logStream_;
 
         inline static const std::unordered_map<LogLevel, std::string> LevelColor = {
-            {LogLevel::Default, "\033[0m"},
-            {LogLevel::Debug, "\033[34m"},
-            {LogLevel::Info, "\033[32m"},
-            {LogLevel::Warning, "\033[33m"},
-            {LogLevel::Error, "\033[31m"}
+                {LogLevel::Default, "\033[0m"},
+                {LogLevel::Debug,   "\033[34m"},
+                {LogLevel::Info,    "\033[32m"},
+                {LogLevel::Warning, "\033[33m"},
+                {LogLevel::Error,   "\033[31m"}
         };
 
     public:
-        explicit Impl(const char *fileName, const int line, const LogLevel logLevel): fileName_(fileName), line_(line),
-            logLevel_(logLevel) {
+        explicit Impl(const char *fileName, const int line, const LogLevel logLevel) :
+                fileName_(fileName),
+                line_(line),
+                logLevel_(logLevel) {
             if (colorful_) {
                 logStream_ << LevelColor.at(logLevel_);
             }
@@ -103,12 +105,13 @@ class Logger {
 
     inline static OutputCallback outPutCallback_ =
             [](const char *const buffer, const size_t len) {
-        fwrite(buffer, len, sizeof(char), stdout);
-    };
+                fwrite(buffer, len, sizeof(char), stdout);
+            };
 
-    inline static FlushCallback flushCallback_ = [] {
-        fflush(stdout);
-    };
+    inline static FlushCallback flushCallback_ =
+            [] {
+                fflush(stdout);
+            };
 
 public:
     // 此对象不应该被复制或移动，它应该仅仅是随用随弃的临时对象，以充分利用RAII机制
@@ -120,7 +123,8 @@ public:
 
     Logger &operator=(Logger &&) = delete;
 
-    Logger(const char *fileName, const int line, const LogLevel logLevel): impl_(fileName, line, logLevel) {
+    Logger(const char *fileName, const int line, const LogLevel logLevel) :
+            impl_(fileName, line, logLevel) {
     }
 
     [[nodiscard]]

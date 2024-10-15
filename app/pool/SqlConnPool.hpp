@@ -50,7 +50,16 @@ class SqlConnPool {
         bool moved_ = false;
 
     public:
-        Connection(MYSQL *conn, SqlConnPool &pool): conn_(conn), pool_(pool) {
+        Connection(MYSQL *conn, SqlConnPool &pool) :
+                conn_(conn),
+                pool_(pool) {
+        }
+
+        // 析构时释放连接
+        ~Connection() {
+            if (conn_ && !moved_) {
+                pool_.releaseConnection(conn_);
+            }
         }
 
         // 禁止拷贝
@@ -59,16 +68,12 @@ class SqlConnPool {
         Connection &operator=(const Connection &) = delete;
 
         // 移动构造
-        Connection(Connection &&other) noexcept: conn_(other.conn_), pool_(other.pool_), moved_(other.moved_) {
+        Connection(Connection &&other) noexcept:
+                conn_(other.conn_),
+                pool_(other.pool_),
+                moved_(other.moved_) {
             other.conn_ = nullptr;
             other.moved_ = true;
-        }
-
-        // 析构时释放连接
-        ~Connection() {
-            if (conn_ && !moved_) {
-                pool_.releaseConnection(conn_);
-            }
         }
 
         // 移动赋值
@@ -154,69 +159,10 @@ public:
     // 获取连接（返回 Connection 对象）
     static Connection getConnection() {
         static SqlConnPool sqlConnPool;
-        return  sqlConnPool._getConnection();
+        LOGD << "SqlConnPool::getConnection()";
+        return sqlConnPool._getConnection();
     }
 };
-
-// 数据库连接池测试
-// #include <iostream>
-// int main() {
-//     try {
-//         // 获取连接并进行数据库操作
-//         {
-//             const auto conn = SqlConnPool::getConnection(); // conn 是一个 RAII Connection 对象
-//             // 使用 conn 进行数据库操作
-//             if (conn.get() && mysql_query(conn.get(), "SELECT VERSION()")) {
-//                 std::cerr << "MySQL query error: " << mysql_error(conn.get()) << std::endl;
-//             } else {
-//                 if (const auto res = mysql_store_result(conn.get())) {
-//                     if (const auto row = mysql_fetch_row(res)) {
-//                         std::cout << "MySQL Version: " << row[0] << std::endl;
-//                     }
-//                     mysql_free_result(res);
-//                 }
-//             }
-//             // conn 在这里会被释放（自动归还连接池）
-//         }
-//
-//         // 也可以使用多线程来测试连接池
-//         auto worker = [](const int id) {
-//             try {
-//                 const auto conn = SqlConnPool::getConnection();
-//                 const std::string query = "SELECT NOW();";
-//                 if (mysql_query(conn.get(), query.c_str())) {
-//                     std::cerr << "Thread " << id << " MySQL query error: " << mysql_error(conn.get()) << std::endl;
-//                 } else {
-//                     if (const auto res = mysql_store_result(conn.get())) {
-//                         if (const auto row = mysql_fetch_row(res)) {
-//                             std::cout << "Thread " << id << " MySQL NOW(): " << row[0] << std::endl;
-//                         }
-//                         mysql_free_result(res);
-//                     }
-//                 }
-//                 // conn 在此作用域结束时自动归还
-//             } catch (const std::exception &ex) {
-//                 std::cerr << "Thread " << id << " Error: " << ex.what() << std::endl;
-//             }
-//         };
-//
-//         // 启动多个线程
-//         std::vector<std::thread> threads;
-//         for (int i = 0; i < 15; ++i) {
-//             threads.emplace_back(worker, i);
-//         }
-//
-//         // 等待所有线程完成
-//         for (auto &t: threads) {
-//             t.join();
-//         }
-//     } catch (const std::exception &ex) {
-//         std::cerr << "Error: " << ex.what() << std::endl;
-//     }
-//
-//     // 程序结束前可以手动销毁连接池，或让析构函数自动处理
-//     return 0;
-// }
 
 
 #endif //TINYWEBSERVER_SQLCONNPOOL_HPP

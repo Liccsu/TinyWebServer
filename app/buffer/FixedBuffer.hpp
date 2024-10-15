@@ -35,7 +35,8 @@ class FixedBuffer {
     }
 
 public:
-    FixedBuffer(): cur_(data_) {
+    FixedBuffer() :
+            cur_(data_) {
     }
 
     ~FixedBuffer() = default;

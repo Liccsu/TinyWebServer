@@ -32,7 +32,8 @@ class BlockingQueue {
     std::condition_variable cvProducer;
 
 public:
-    explicit BlockingQueue(const size_t maxCapacity = std::numeric_limits<size_t>::max()): capacity_(maxCapacity) {
+    explicit BlockingQueue(const size_t maxCapacity = std::numeric_limits<size_t>::max()) :
+            capacity_(maxCapacity) {
         assert(maxCapacity > 0);
     }
 

@@ -38,7 +38,8 @@ class LogFile {
         }
 
     public:
-        explicit AppendFile(const std::string &fileName): fp_(fopen(fileName.c_str(), "ae")) {
+        explicit AppendFile(const std::string &fileName) :
+                fp_(fopen(fileName.c_str(), "ae")) {
             assert(fp_);
             setbuffer(fp_, buffer_, sizeof(buffer_));
         }
@@ -79,11 +80,11 @@ class LogFile {
     static std::string getLogFileName(const std::string &baseName, time_t &now);
 
 public:
-    explicit LogFile(const int flushInterval = 3, const int checkEveryN = 1024):
-        baseName_(Config::get<std::string>("log.basename")),
-        rollSize_(Config::get<size_t>("log.size") * 1024 * 1024),
-        flushInterval_(flushInterval),
-        checkEveryN_(checkEveryN) {
+    explicit LogFile(const int flushInterval = 3, const int checkEveryN = 1024) :
+            baseName_(Config::get<std::string>("log.basename")),
+            rollSize_(Config::get<size_t>("log.size") * 1024 * 1024),
+            flushInterval_(flushInterval),
+            checkEveryN_(checkEveryN) {
         assert(baseName_.find('/') == std::string::npos);
         rollFile();
     }

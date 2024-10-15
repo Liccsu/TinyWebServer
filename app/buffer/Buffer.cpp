@@ -82,16 +82,3 @@ auto Buffer::readFd(const int fd) -> std::tuple<ssize_t, int> {
 
     return std::tuple{len, err};
 }
-
-// 写入数据到fd文件
-auto Buffer::writeFd(const int fd) -> std::tuple<ssize_t, int> {
-    int err = 0;
-    const ssize_t len = write(fd, peek(), readableSize());
-    if (len < 0) {
-        err = errno;
-    } else {
-        retrieve(len);
-    }
-
-    return std::tuple{len, err};
-}

@@ -19,8 +19,6 @@
 
 #include <mysql/mysqld_error.h>
 
-#include "../logger/Logger.hpp"
-
 SqlConnPool::SqlConnPool() {
     // 读取配置
     host_ = Config::get<std::string>("mysql.host");
@@ -82,10 +80,12 @@ MysqlPtr SqlConnPool::createConnection() const {
 }
 
 SqlConnPool::Connection SqlConnPool::_getConnection() {
+    LOGD << "enter SqlConnPool::_getConnection()";
     std::unique_lock lock(poolMutex_);
-
+    LOGD << "lock(poolMutex_)";
     if (connQue_.empty() && currentPoolSize_ >= maxPoolSize_) {
         // 等待有连接可用或允许扩展连接池
+        LOGD << "condition wait to !connQue_.empty() || currentPoolSize_ < maxPoolSize_";
         cond_.wait(lock, [this]() {
             return !connQue_.empty() || currentPoolSize_ < maxPoolSize_;
         });
@@ -93,14 +93,17 @@ SqlConnPool::Connection SqlConnPool::_getConnection() {
     // 如果有空闲的连接
     if (!connQue_.empty()) {
         // 从队列中取出一个连接
+        LOGD << "!connQue_.empty()";
         MYSQL *conn = connQue_.front();
         connQue_.pop();
         --availableConnections_;
         usedConn_.emplace_back(conn);
         return {conn, *this};
     }
+    LOGD << "connQue_.empty()";
     // 如果没有空闲的连接且当前连接池大小小于设定的最大连接池大小
     if (currentPoolSize_ < maxPoolSize_) {
+        LOGD << "currentPoolSize_ < maxPoolSize_";
         // 则动态扩展连接池
         if (MysqlPtr newConn = createConnection()) {
             MYSQL *rawConn = newConn.release();
@@ -171,50 +174,51 @@ bool SqlConnPool::ensureDatabase() const {
 
 void SqlConnPool::monitorPool() {
     while (!shutdown_) {
-        std::unique_lock lock(poolMutex_);
-        // 健康检查：检查可用连接
-        std::queue<MYSQL *> tempQueue;
-        while (!connQue_.empty()) {
-            MYSQL *conn = connQue_.front();
-            connQue_.pop();
+        {
+            std::unique_lock lock(poolMutex_);
+            // 健康检查：检查可用连接
+            std::queue<MYSQL *> tempQueue;
+            while (!connQue_.empty()) {
+                MYSQL *conn = connQue_.front();
+                connQue_.pop();
 
-            if (mysql_ping(conn) != 0) {
-                LOGE << "MySQL connection lost: " << mysql_error(conn) << ". Attempting to reconnect...";
-                // 尝试重连
-                if (MysqlPtr newConn = createConnection()) {
-                    LOGD << "Reconnected to MySQL successfully";
-                    tempQueue.emplace(newConn.release());
+                if (mysql_ping(conn) != 0) {
+                    LOGE << "MySQL connection lost: " << mysql_error(conn) << ". Attempting to reconnect...";
+                    // 尝试重连
+                    if (MysqlPtr newConn = createConnection()) {
+                        LOGD << "Reconnected to MySQL successfully";
+                        tempQueue.emplace(newConn.release());
+                    } else {
+                        LOGE << "Failed to reconnect to MySQL. Removing connection from pool";
+                        --currentPoolSize_;
+                        --availableConnections_;
+                        // 不将该连接放回池中
+                    }
                 } else {
-                    LOGE << "Failed to reconnect to MySQL. Removing connection from pool";
-                    --currentPoolSize_;
-                    --availableConnections_;
-                    // 不将该连接放回池中
-                }
-            } else {
-                tempQueue.emplace(conn);
-            }
-        }
-        // 交换回原来的队列
-        connQue_ = std::move(tempQueue);
-
-        // 动态收缩连接池
-        if (availableConnections_ > minPoolSize_) {
-            const int connectionsToRemove = availableConnections_ - minPoolSize_;
-            for (int i = 0; i < connectionsToRemove; ++i) {
-                if (!connQue_.empty()) {
-                    MYSQL *conn = connQue_.front();
-                    connQue_.pop();
-                    // 使用 unique_ptr 自动管理资源
-                    MysqlPtr ptr(conn);
-                    --currentPoolSize_;
-                    --availableConnections_;
+                    tempQueue.emplace(conn);
                 }
             }
-            LOGD << "Shrunk connection pool to " << currentPoolSize_ << " connections";
+            // 交换回原来的队列
+            connQue_ = std::move(tempQueue);
+
+            // 动态收缩连接池
+            if (availableConnections_ > minPoolSize_) {
+                const int connectionsToRemove = availableConnections_ - minPoolSize_;
+                for (int i = 0; i < connectionsToRemove; ++i) {
+                    if (!connQue_.empty()) {
+                        MYSQL *conn = connQue_.front();
+                        connQue_.pop();
+                        // 使用 unique_ptr 自动管理资源
+                        MysqlPtr ptr(conn);
+                        --currentPoolSize_;
+                        --availableConnections_;
+                    }
+                }
+                LOGD << "Shrunk connection pool to " << currentPoolSize_ << " connections";
+            }
+
+            // TODO: 如果某一段时间内连接使用率超过阈值，则增加连接数
         }
-
-        // TODO: 如果某一段时间内连接使用率超过阈值，则增加连接数
-
         // 每60秒检查一次
         std::this_thread::sleep_for(std::chrono::seconds(60));
     }

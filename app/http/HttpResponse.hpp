@@ -35,57 +35,57 @@ class HttpResponse {
     struct stat mmFileStat_;
     // Content Type 类型集
     inline static const std::unordered_map<std::string, std::string> CONTENT_TYPE = {
-        {".bmp", "application/x-bmp"},
-        {".doc", "application/msword"},
-        {".exe", "application/x-msdownload"},
-        {".htm", "text/html"},
-        {".html", "text/html"},
-        {".ico", "image/x-icon"},
-        {".java", "java/*"},
-        {".latex", "application/x-latex"},
-        {".xml", "text/xml"},
-        {".xhtml", "application/xhtml+xml"},
-        {".txt", "text/plain"},
-        {".rtf", "application/rtf"},
-        {".pdf", "application/pdf"},
-        {".ppt", "application/vnd.ms-powerpoint"},
-        {".word", "application/nsword"},
-        {".png", "image/png"},
-        {".gif", "image/gif"},
-        {".jfif", "image/jpeg"},
-        {".jpg", "image/jpeg"},
-        {".jpeg", "image/jpeg"},
-        {".svg", "text/xml"},
-        {".au", "audio/basic"},
-        {".mpeg", "application/octet-stream"},
-        {".mpg", "application/octet-stream"},
-        {".mp3", "application/octet-stream"},
-        {".mp4", "application/octet-stream"},
-        {".mpv", "application/octet-stream"},
-        {".avi", "application/octet-stream"},
-        {".gz", "application/x-gzip"},
-        {".tar", "application/x-tar"},
-        {".css", "text/css"},
-        {".js", "application/x-javascript"},
-        {".torrent", "application/x-bittorrent"},
-        {".wav", "application/octet-stream"},
-        {".xsl", "text/xml"},
-        {".xslt", "text/xml"},
-        {".apk", "application/vnd.android.package-archive"},
-        {".ipa", "application/vnd.iphone"}
+            {".bmp",     "application/x-bmp"},
+            {".doc",     "application/msword"},
+            {".exe",     "application/x-msdownload"},
+            {".htm",     "text/html"},
+            {".html",    "text/html"},
+            {".ico",     "image/x-icon"},
+            {".java",    "java/*"},
+            {".latex",   "application/x-latex"},
+            {".xml",     "text/xml"},
+            {".xhtml",   "application/xhtml+xml"},
+            {".txt",     "text/plain"},
+            {".rtf",     "application/rtf"},
+            {".pdf",     "application/pdf"},
+            {".ppt",     "application/vnd.ms-powerpoint"},
+            {".word",    "application/nsword"},
+            {".png",     "image/png"},
+            {".gif",     "image/gif"},
+            {".jfif",    "image/jpeg"},
+            {".jpg",     "image/jpeg"},
+            {".jpeg",    "image/jpeg"},
+            {".svg",     "text/xml"},
+            {".au",      "audio/basic"},
+            {".mpeg",    "application/octet-stream"},
+            {".mpg",     "application/octet-stream"},
+            {".mp3",     "application/octet-stream"},
+            {".mp4",     "application/octet-stream"},
+            {".mpv",     "application/octet-stream"},
+            {".avi",     "application/octet-stream"},
+            {".gz",      "application/x-gzip"},
+            {".tar",     "application/x-tar"},
+            {".css",     "text/css"},
+            {".js",      "application/x-javascript"},
+            {".torrent", "application/x-bittorrent"},
+            {".wav",     "application/octet-stream"},
+            {".xsl",     "text/xml"},
+            {".xslt",    "text/xml"},
+            {".apk",     "application/vnd.android.package-archive"},
+            {".ipa",     "application/vnd.iphone"}
     };
     // 编码状态集
     inline static const std::unordered_map<int, std::string> CODE_STATUS = {
-        {200, "OK"},
-        {400, "Bad Request"},
-        {403, "Forbidden"},
-        {404, "Not Found"}
+            {200, "OK"},
+            {400, "Bad Request"},
+            {403, "Forbidden"},
+            {404, "Not Found"}
     };
     // 编码路径集
     inline static const std::unordered_map<int, std::string> CODE_PATH = {
-        {400, "/400.html"},
-        {403, "/403.html"},
-        {404, "/404.html"}
+            {400, "/400.html"},
+            {403, "/403.html"},
+            {404, "/404.html"}
     };
 
     void addStateLine(Buffer &buff);
@@ -100,7 +100,11 @@ class HttpResponse {
     std::string getFileType() const;
 
 public:
-    HttpResponse(): code_(-1), isKeepAlive_(false), mmFile_(nullptr), mmFileStat_() {
+    HttpResponse() :
+            code_(-1),
+            isKeepAlive_(false),
+            mmFile_(nullptr),
+            mmFileStat_() {
     }
 
     ~HttpResponse() {

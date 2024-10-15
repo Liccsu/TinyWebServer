@@ -21,7 +21,6 @@
 #include <filesystem>
 #include <mysql.h>
 
-#include "../logger/Logger.hpp"
 #include "../pool/SqlConnPool.hpp"
 
 bool HttpRequest::parseRequestLine(const std::string &line) {
@@ -226,6 +225,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
     }
 
     // 检查并创建 user 表
+    LOGD << "Check and create user table";
     const auto createTableQuery = R"(
         CREATE TABLE IF NOT EXISTS `user` (
             username VARCHAR(255) NOT NULL PRIMARY KEY,
@@ -240,6 +240,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
 
     // 使用预处理语句(更高效)或转义用户输入以避免 SQL 注入攻击
     // 准备预处理语句
+    LOGD << "mysql_stmt_init";
     MYSQL_STMT *stmt = mysql_stmt_init(conn.get());
     if (!stmt) {
         LOGE << "mysql_stmt_init failed";
@@ -247,7 +248,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
     }
 
     if (const auto query = "SELECT username, password FROM `user` WHERE username=? LIMIT 1";
-        mysql_stmt_prepare(stmt, query, strlen(query))) {
+            mysql_stmt_prepare(stmt, query, strlen(query))) {
         LOGE << "mysql_stmt_prepare failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
         return false;
@@ -264,6 +265,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
     bind[0].buffer_length = name.length();
     bind[0].is_null = &name_is_null;
 
+    LOGD << "mysql_stmt_bind_param";
     if (mysql_stmt_bind_param(stmt, bind)) {
         LOGE << "mysql_stmt_bind_param failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
@@ -271,6 +273,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
     }
 
     // 执行预处理语句
+    LOGD << "mysql_stmt_execute";
     if (mysql_stmt_execute(stmt)) {
         LOGE << "mysql_stmt_execute failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
@@ -294,6 +297,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
     bind[1].length = &password_length;
     bind[1].is_null = &pwd_is_null;
 
+    LOGD << "mysql_stmt_bind_result";
     if (mysql_stmt_bind_result(stmt, bind)) {
         LOGE << "mysql_stmt_bind_result failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
@@ -301,6 +305,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
     }
 
     // 获取结果
+    LOGD << "mysql_stmt_store_result";
     if (mysql_stmt_store_result(stmt)) {
         LOGE << "mysql_stmt_store_result failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
@@ -309,7 +314,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
 
     while (mysql_stmt_fetch(stmt) == 0) {
         LOGI << "MYSQL ROW: " << (strlen(db_username) > 0 ? db_username : "NULL") << " "
-            << (strlen(db_password) ? db_password : "NULL");
+             << (strlen(db_password) ? db_password : "NULL");
         std::string password(strlen(db_password) ? db_password : "");
         // 登陆行为 且 密码正确
         if (isLogin) {
@@ -338,7 +343,7 @@ bool HttpRequest::userVerify(const std::string &name, const std::string &pwd, co
         }
 
         if (const auto insert_query = "INSERT INTO `user`(username, password) VALUES(?, ?)";
-            mysql_stmt_prepare(stmt, insert_query, strlen(insert_query))) {
+                mysql_stmt_prepare(stmt, insert_query, strlen(insert_query))) {
             LOGE << "mysql_stmt_prepare failed: " << mysql_stmt_error(stmt);
             mysql_stmt_close(stmt);
             return false;
@@ -440,46 +445,6 @@ bool HttpRequest::parse(Buffer &buff) {
     }
     LOGD << "[" << METHOD_STR.at(method_) << "], [" << path_.c_str() << "], [" << VERSION_STR.at(version_) << "]";
     return true;
-}
-
-std::string HttpRequest::path() const {
-    return path_;
-}
-
-std::string &HttpRequest::path() {
-    return path_;
-}
-
-std::string HttpRequest::method() const {
-    return METHOD_STR.at(method_);
-}
-
-std::string HttpRequest::version() const {
-    return VERSION_STR.at(version_);
-}
-
-std::string HttpRequest::getPost(const std::string &key) const {
-    assert(!key.empty());
-    if (const auto it = posts_.find(key); it != posts_.end()) {
-        return posts_.find(key)->second;
-    }
-    return "";
-}
-
-std::string HttpRequest::getPost(const char *key) const {
-    assert(key != nullptr);
-    if (const auto it = posts_.find(key); it != posts_.end()) {
-        return posts_.find(key)->second;
-    }
-    return "";
-}
-
-bool HttpRequest::isKeepAlive() const {
-    if (const auto it = headers_.find("Connection"); it != headers_.end()) {
-        return (it->second == "keep-alive" || it->second == "Keep-Alive") && version_ == Version::Http11;
-    }
-    LOGW << "Connection header not found";
-    return false;
 }
 
 void HttpRequest::preloadAllHtml(const std::string &rootPath, const bool recursive) {

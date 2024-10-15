@@ -23,6 +23,7 @@
 #include <unordered_set>
 
 #include "../buffer/Buffer.hpp"
+#include "../logger/Logger.hpp"
 
 class HttpRequest {
     enum class ParseState {
@@ -57,20 +58,20 @@ class HttpRequest {
     std::unordered_map<std::string, std::string> posts_;
 
     inline static const std::unordered_map<Method, std::string> METHOD_STR = {
-        {Method::Get, "GET"},
-        {Method::Post, "POST"},
-        {Method::Head, "HEAD"},
-        {Method::Put, "PUT"},
-        {Method::Delete, "DELETE"},
-        {Method::Connect, "CONNECT"},
-        {Method::Options, "OPTIONS"},
-        {Method::Trace, "TRACE"}
+            {Method::Get,     "GET"},
+            {Method::Post,    "POST"},
+            {Method::Head,    "HEAD"},
+            {Method::Put,     "PUT"},
+            {Method::Delete,  "DELETE"},
+            {Method::Connect, "CONNECT"},
+            {Method::Options, "OPTIONS"},
+            {Method::Trace,   "TRACE"}
     };
 
     inline static const std::unordered_map<Version, std::string> VERSION_STR = {
-        {Version::Unknown, "HTTP/Unknown"},
-        {Version::Http10, "HTTP/1.0"},
-        {Version::Http11, "HTTP/1.1"}
+            {Version::Unknown, "HTTP/Unknown"},
+            {Version::Http10,  "HTTP/1.0"},
+            {Version::Http11,  "HTTP/1.1"}
     };
 
     inline static std::unordered_set<std::string> ALL_HTML;
@@ -102,7 +103,10 @@ class HttpRequest {
     static int hexCovert(char ch);
 
 public:
-    HttpRequest(): state_(ParseState::ParseLine), method_(Method::Get), version_(Version::Http11) {
+    HttpRequest() :
+            state_(ParseState::ParseLine),
+            method_(Method::Get),
+            version_(Version::Http11) {
     }
 
     ~HttpRequest() = default;
@@ -111,28 +115,54 @@ public:
 
     bool parse(Buffer &buff);
 
-    [[nodiscard]]
-    std::string path() const;
-
-    [[nodiscard]]
-    std::string &path();
-
-    [[nodiscard]]
-    std::string method() const;
-
-    [[nodiscard]]
-    std::string version() const;
-
-    [[nodiscard]]
-    std::string getPost(const std::string &key) const;
-
-    [[nodiscard]]
-    std::string getPost(const char *key) const;
-
-    [[nodiscard]]
-    bool isKeepAlive() const;
-
     static void preloadAllHtml(const std::string &rootPath, bool recursive = false);
+
+    [[nodiscard]]
+    std::string getPath() const {
+        return path_;
+    }
+
+    [[nodiscard]]
+    std::string &getPath() {
+        return path_;
+    }
+
+    [[nodiscard]]
+    std::string getMethod() const {
+        return METHOD_STR.at(method_);
+    }
+
+    [[nodiscard]]
+    std::string getVersion() const {
+        return VERSION_STR.at(version_);
+    }
+
+    [[nodiscard]]
+    std::string getPost(const std::string &key) const {
+        assert(!key.empty());
+        if (const auto it = posts_.find(key); it != posts_.end()) {
+            return posts_.find(key)->second;
+        }
+        return "";
+    }
+
+    [[nodiscard]]
+    std::string getPost(const char *key) const {
+        assert(key != nullptr);
+        if (const auto it = posts_.find(key); it != posts_.end()) {
+            return posts_.find(key)->second;
+        }
+        return "";
+    }
+
+    [[nodiscard]]
+    bool isKeepAlive() const {
+        if (const auto it = headers_.find("Connection"); it != headers_.end()) {
+            return (it->second == "keep-alive" || it->second == "Keep-Alive") && version_ == Version::Http11;
+        }
+        LOGW << "Connection header not found";
+        return false;
+    }
 };
 
 

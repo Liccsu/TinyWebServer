@@ -18,18 +18,19 @@
 #include "WebServer.hpp"
 
 #include <cstring>
-#include <fcntl.h>
 #include <filesystem>
 #include <sys/epoll.h>
 #include <sys/poll.h>
 #include <sys/uio.h>
 
 #include "../config/Config.hpp"
-#include "../logger/Logger.hpp"
 #include "../pool/SqlConnPool.hpp"
 
-WebServer::WebServer(): isClose_(false), timer_(new TimerHeap()), threadPool_(new ThreadPool()),
-                        epoller_(new Epoller()) {
+WebServer::WebServer() :
+        isClose_(false),
+        timer_(new TimerHeap()),
+        threadPool_(new ThreadPool()),
+        epoller_(new Epoller()) {
     const auto sitePath = Config::get<std::string>("site.path");
     assert(!sitePath.empty());
     const std::filesystem::path path(sitePath);

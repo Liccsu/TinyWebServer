@@ -29,7 +29,7 @@
 #include "BlockingQueue.hpp"
 
 class ThreadPool {
-    std::atomic<bool> shutdown_;
+    std::atomic<bool> shutdown_ = false;
     BlockingQueue<std::function<void()> > queue_;
     std::vector<std::thread> threads_;
     std::mutex mutex_;
@@ -41,7 +41,8 @@ class ThreadPool {
     public:
         ThreadWorker() = delete;
 
-        explicit ThreadWorker(ThreadPool *pool): pool_(pool) {
+        explicit ThreadWorker(ThreadPool *pool) :
+                pool_(pool) {
         }
 
         void operator()() const {
@@ -63,10 +64,12 @@ class ThreadPool {
     };
 
 public:
-    ThreadPool(): ThreadPool(std::thread::hardware_concurrency() * 2) {
+    ThreadPool() :
+            ThreadPool(std::thread::hardware_concurrency() * 2) {
     }
 
-    explicit ThreadPool(const size_t nThreads): shutdown_(false), threads_(nThreads > 0 ? nThreads : 8) {
+    explicit ThreadPool(const size_t nThreads) :
+            threads_(nThreads > 0 ? nThreads : 8) {
         for (auto &thread: threads_) {
             thread = std::thread(ThreadWorker(this));
         }
@@ -97,7 +100,8 @@ public:
     auto submit(F &&f, Args &&... args) -> std::future<std::invoke_result_t<F, Args...> > {
         // 创建一个准备执行的函数对象
         std::function<std::invoke_result_t<F, Args...>()> func = std::bind(
-            std::forward<F>(f), std::forward<Args>(args)...);
+                std::forward<F>(f), std::forward<Args>(args)...
+        );
         // 将其封装到共享的智能指针中，以便能够复制、构造、分配
         auto taskPtr = std::make_shared<std::packaged_task<std::invoke_result_t<F, Args...>()> >(func);
         // 将封装的任务包装到 void 函数中

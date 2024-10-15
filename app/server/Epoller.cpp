@@ -21,10 +21,13 @@
 #include <unistd.h>
 #include <sys/epoll.h>
 
-Epoller::Epoller(): Epoller(16) {
+Epoller::Epoller() :
+        Epoller(16) {
 }
 
-Epoller::Epoller(const int maxEvent): epollFd_(epoll_create1(EPOLL_CLOEXEC)), events_(maxEvent) {
+Epoller::Epoller(const int maxEvent) :
+        epollFd_(epoll_create1(EPOLL_CLOEXEC)),
+        events_(maxEvent) {
     assert(epollFd_ >= 0 && !events_.empty());
 }
 

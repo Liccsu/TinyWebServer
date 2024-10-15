@@ -119,10 +119,11 @@ void AsyncLogging::threadCallback() {
     logFile.flush();
 }
 
-AsyncLogging::AsyncLogging(const int flushInterval): flushInterval_(flushInterval),
-                                                     running_(false),
-                                                     currentBuffer_(new LogBuffer),
-                                                     nextBuffer_(new LogBuffer) {
+AsyncLogging::AsyncLogging(const int flushInterval) :
+        flushInterval_(flushInterval),
+        running_(false),
+        currentBuffer_(new LogBuffer),
+        nextBuffer_(new LogBuffer) {
     currentBuffer_->clear();
     nextBuffer_->clear();
     buffers_.reserve(16);

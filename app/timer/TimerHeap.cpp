@@ -29,7 +29,7 @@ void TimerHeap::remove(const size_t index) {
 
         const size_t idx = refMap_[index];
         if (const auto parentIndexOpt = parent(idx);
-            parentIndexOpt.has_value() && heap_[idx] < heap_[parentIndexOpt.value()]) {
+                parentIndexOpt.has_value() && heap_[idx] < heap_[parentIndexOpt.value()]) {
             bubbleUp(idx);
         } else {
             bubbleDown(idx);
@@ -41,16 +41,6 @@ void TimerHeap::remove(const size_t index) {
 
 void TimerHeap::bubbleUp(size_t index) {
     assert(index >= 0 && index < heap_.size());
-    // size_t parent = (index - 1) / 2;
-    // while (static_cast<ssize_t>(parent) >= 0) {
-    //     if (heap_[parent] > heap_[index]) {
-    //         swap(index, parent);
-    //         index = parent;
-    //         parent = (index - 1) / 2;
-    //     } else {
-    //         break;
-    //     }
-    // }
     while (index > 0) {
         const auto parentIndexOpt = parent(index);
         if (!parentIndexOpt.has_value() || !(heap_[index] < heap_[parentIndexOpt.value()])) {
@@ -86,27 +76,6 @@ void TimerHeap::bubbleDown(size_t index) {
     }
 }
 
-// bool TimerHeap::bubbleDown(const size_t index, const size_t n) {
-//     assert(i >= 0 && i < heap_.size());
-//     // n:共几个结点
-//     assert(n >= 0 && n <= heap_.size());
-//     size_t idx = index;
-//     size_t child = 2 * idx + 1;
-//     while (child < n) {
-//         if (child + 1 < n && heap_[child + 1] < heap_[child]) {
-//             child++;
-//         }
-//         if (heap_[child] < heap_[idx]) {
-//             swap(idx, child);
-//             idx = child;
-//             child = 2 * child + 1;
-//         } else {
-//             break;
-//         }
-//     }
-//     return idx > index;
-// }
-
 void TimerHeap::swap(const size_t i, const size_t j) {
     assert(i >= 0 && i < heap_.size());
     assert(j >= 0 && j < heap_.size());
@@ -121,7 +90,7 @@ void TimerHeap::resetTimer(const uint64_t id, const int64_t newExpiration) {
     const size_t idx = refMap_[id];
     heap_[idx].expiration = Clock::now() + std::chrono::milliseconds(newExpiration);
     if (const auto parentIndexOpt = parent(idx);
-        parentIndexOpt.has_value() && heap_[idx] < heap_[parentIndexOpt.value()]) {
+            parentIndexOpt.has_value() && heap_[idx] < heap_[parentIndexOpt.value()]) {
         bubbleUp(idx);
     } else {
         bubbleDown(idx);
@@ -136,7 +105,7 @@ uint64_t TimerHeap::addTimer(const uint64_t id, const int64_t timeout, const Tim
         heap_[idx].expiration = Clock::now() + std::chrono::milliseconds(timeout);
         heap_[idx].timeoutCallback = timeoutCallback;
         if (const auto parentIndexOpt = parent(idx);
-            parentIndexOpt.has_value() && heap_[idx] < heap_[parentIndexOpt.value()]) {
+                parentIndexOpt.has_value() && heap_[idx] < heap_[parentIndexOpt.value()]) {
             bubbleUp(idx);
         } else {
             bubbleDown(idx);
@@ -145,10 +114,10 @@ uint64_t TimerHeap::addTimer(const uint64_t id, const int64_t timeout, const Tim
         const size_t idx = heap_.size();
         refMap_[id] = idx;
         heap_.push_back({
-            id,
-            Clock::now() + std::chrono::milliseconds(timeout),
-            timeoutCallback
-        });
+                                id,
+                                Clock::now() + std::chrono::milliseconds(timeout),
+                                timeoutCallback
+                        });
         bubbleUp(idx);
     }
 
@@ -183,8 +152,8 @@ void TimerHeap::pop() {
 int64_t TimerHeap::peek() {
     tick();
     if (!heap_.empty()) {
-        int64_t res = std::chrono::duration_cast<std::chrono::milliseconds>(heap_.front().expiration - Clock::now()).
-                count();
+        auto earliest = heap_.front().expiration;
+        int64_t res = std::chrono::duration_cast<std::chrono::milliseconds>(earliest - Clock::now()).count();
         if (res < 0) {
             res = 0;
         }

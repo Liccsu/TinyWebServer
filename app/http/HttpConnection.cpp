@@ -20,8 +20,6 @@
 #include <cassert>
 #include <sys/uio.h>
 
-#include "../logger/Logger.hpp"
-
 void HttpConnection::init(const int sockFd, const sockaddr_in &addr) {
     assert(sockFd > 0);
     std::lock_guard lock(mutex_);
@@ -32,7 +30,7 @@ void HttpConnection::init(const int sockFd, const sockaddr_in &addr) {
     readBuff_.retrieveAll();
     isClose_ = false;
     LOGI << "Client[" << fd_ << "][" << getIp() << ":" << getPort()
-        << "] has connected, connection count:" << connectionCount;
+         << "] has connected, connection count:" << connectionCount;
 }
 
 auto HttpConnection::read() -> std::tuple<ssize_t, int> {
@@ -96,7 +94,7 @@ void HttpConnection::close() {
         --connectionCount;
         ::close(fd_);
         LOGI << "Client[" << fd_ << "][" << getIp() << ":" << getPort()
-        << "] quit, client count:" << connectionCount;
+             << "] quit, client count:" << connectionCount;
     }
 }
 
@@ -106,9 +104,9 @@ bool HttpConnection::process() {
         return false;
     }
     if (request_.parse(readBuff_)) {
-        response_.init(sitePath, request_.path(), request_.isKeepAlive(), 200);
+        response_.init(sitePath, request_.getPath(), request_.isKeepAlive(), 200);
     } else {
-        response_.init(sitePath, request_.path(), false, 400);
+        response_.init(sitePath, request_.getPath(), false, 400);
     }
     // 生成响应报文放入writeBuff_中
     response_.makeResponse(writeBuff_);

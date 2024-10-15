@@ -36,12 +36,24 @@ class TimerHeap {
         // 超时回调function<void()>
         TimeoutCallback timeoutCallback;
 
-        bool operator<(const TimerNode &t) const {
-            return expiration < t.expiration;
-        }
-
-        bool operator>(const TimerNode &t) const {
-            return expiration > t.expiration;
+        // 重载三路比较运算符(C++20起)可以同时默认实现 > < >= <= == != 六种基本比较运算符，减少代码冗余
+        // 三路比较运算符(C++20起)可以返回三种类型：
+        // std::strong_ordering：强序，严格的顺序比较。隐含可替换关系，若 a 等价于 b，则 f(a) 等价于 f(b)
+        //   若 a 小于 b，返回 std::strong_ordering::less
+        //   若 a 大于 b，返回 std::strong_ordering::greater
+        //   若 a 等于 b，返回 std::strong_ordering::equal
+        // std::weak_ordering：弱序，允许等价但不严格的顺序比较。不隐含可替换关系，若 a 等价于 b，则 f(a) 不一定等价于 f(b)
+        //   若 a 小于 b，返回 std::weak_ordering::less
+        //   若 a 大于 b，返回 std::weak_ordering::greater
+        //   若 a 等价于 b，返回 std::weak_ordering::equivalent
+        // std::partial_ordering：偏序，允许部分顺序比较。既不隐含可替换关系，也允许完全不可比较关系
+        //   若 a 小于 b，返回 std::partial_ordering::less
+        //   若 a 大于 b，返回 std::partial_ordering::greater
+        //   若 a 等价于 b，返回 std::partial_ordering::equivalent
+        //   否则，返回 std::partial_ordering::unordered
+        // 此处两个 std::chrono::system_clock::time_point 类型比较的返回值应为 std::strong_ordering
+        auto operator<=>(const TimerNode &t) const {
+            return expiration <=> t.expiration;
         }
     };
 

@@ -29,6 +29,7 @@ class Fmt {
 
 public:
     template<typename T>
+    [[maybe_unused]]
     Fmt(const char *format, T &&value) {
         static_assert(std::is_arithmetic_v<T>, "Must be arithmetic type");
         length_ = std::snprintf(buf_, sizeof(buf_), format, std::forward<T>(value));

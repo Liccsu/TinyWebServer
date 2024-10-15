@@ -79,11 +79,6 @@ public:
         return inet_ntoa(addr_.sin_addr);
     }
 
-    [[nodiscard]]
-    sockaddr_in getAddr() const {
-        return addr_;
-    }
-
     bool process();
 
     // 写的总长度
