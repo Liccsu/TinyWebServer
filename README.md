@@ -4,15 +4,15 @@
 
 这是一个轻量级的、高性能的静态Web Server，使用`C++ 20`标准开发，使用`IO`多路复用和线程池实现了基于“事件分发”的多线程高并发的`Reactor`模式。支持`HTTP/1.0`和`HTTP/1.1`协议，支持`GET`和`POST`请求，具有高并发和高吞吐量，使用[WebBench](https://github.com/Liccsu/WebBench)进行`c10k`压力测试`QPS`(每秒处理请求数)达到`1.8w`，测试环境为笔记本，CPU:`AMD Ryzen 5 3550H`。
 
-![WebBench测试](assets/Bench.png)
+![测试](assets/Bench.png)
 
 以下是程序主要结构：
 
-![](assets/Server.png)
+![程序结构](assets/Server.png)
 
 另外还实现了高性能的异步日志库：
 
-![](assets/Logger.png)
+![日志库结构](assets/Logger.png)
 
 为了简化图例，图中只使用了两块`Buffer`，而实际上程序使用了四块`Buffer`，目的是为了防止前端某个时候写入太快，一下子就用完了前端的那块`Buffer`，而后端的那块`Buffer`还没空出来，导致前端没有空闲的`Buffer`可用而需要新分配缓冲区带来额外的开销，所以程序中实际上预分配了四块`Buffer`，前端和后端各有两块，多出来的一块作为预备缓冲区，虽然这还是不能彻底解决问题，但是也极大程度上的减少了前端等待空闲`Buffer`的时间（实际应用中几乎不会出现四块缓冲区都用完的情况）。
 
