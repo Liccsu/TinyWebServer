@@ -22,6 +22,55 @@
 
 程序使用[YAML](http://www.yaml.org/)进行参数配置，降低硬编码。
 
+目录结构：
+
+```text
+.
+|____LICENSE
+|____app    // 程序源码目录
+| |____server
+| | |____WebServer.cpp
+| | |____Epoller.hpp
+| | |____WebServer.hpp
+| | |____Epoller.cpp
+| |____config
+| | |____Config.cpp
+| | |____Config.hpp
+| |____timer
+| | |____TimerHeap.cpp
+| | |____TimerHeap.hpp
+| |____http
+| | |____HttpRequest.hpp
+| | |____HttpResponse.cpp
+| | |____HttpResponse.hpp
+| | |____HttpConnection.cpp
+| | |____HttpRequest.cpp
+| | |____HttpConnection.hpp
+| |____pool
+| | |____SqlConnPool.cpp
+| | |____ThreadPool.hpp
+| | |____BlockingQueue.hpp
+| | |____SqlConnPool.hpp
+| |____logger
+| | |____AsyncLogging.cpp
+| | |____LogFile.cpp
+| | |____LogStream.hpp
+| | |____Logger.hpp
+| | |____Fmt.hpp
+| | |____LogFile.hpp
+| | |____AsyncLogging.hpp
+| | |____Logger.cpp
+| |____buffer
+| | |____Buffer.hpp
+| | |____Buffer.cpp
+| | |____FixedBuffer.hpp
+|____main.cpp
+|____dist    // 静态网站资源目录
+|____CMakeLists.txt
+|____assets    // README.md 附件目录
+|____README.md
+```
+
 ## 构建并使用
 
 本项目仅支持`Linux`平台，理论上支持各大`Linunx`发行版，并在`Debian12_x64`、`Ubuntu24.02_x64`、`ArchLinux_x64`上测试通过，理论上也支持`ARM`架构的`Linux`发行版（尚未测试）。
