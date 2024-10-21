@@ -71,6 +71,8 @@
 |____README.md
 ```
 
+更多细节详见我的博文[使用现代化C++编写WebServer项目总结](https://liccsu.com/archives/P1K8DUq2)
+
 ## 构建并使用
 
 本项目仅支持`Linux`平台，理论上支持各大`Linunx`发行版，并在`Debian12_x64`、`Ubuntu24.02_x64`、`ArchLinux_x64`上测试通过，理论上也支持`ARM`架构的`Linux`发行版（尚未测试）。
