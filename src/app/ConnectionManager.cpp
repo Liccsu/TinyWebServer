@@ -92,14 +92,11 @@ void ConnectionManager::dealWrite(HttpConnection* client) {
                 // 非 keep-alive 或检测到 pipeline：写完后关闭
                 needClose = true;
             }
-        } else if (ret < 0 && err == EAGAIN) {
-            // 发送缓冲满：继续等待可写事件
-            (void)epoller_.modFd(client->getFd(), EPOLLONESHOT | EPOLLRDHUP | EPOLLOUT);
-        } else if (ret < 0) {
+        } else if (ret < 0 && err != EAGAIN) {
             // 写错误（EPIPE/ECONNRESET 等）：关闭
             needClose = true;
         } else {
-            // 还有剩余数据（writev 循环阈值内）：继续等可写事件，绝不丢数据
+            // EAGAIN（发送缓冲满）或仍有剩余数据（writev 循环阈值内）：继续等可写事件，绝不丢数据
             (void)epoller_.modFd(client->getFd(), EPOLLONESHOT | EPOLLRDHUP | EPOLLOUT);
         }
 

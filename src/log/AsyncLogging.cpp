@@ -17,6 +17,7 @@
 
 #include "AsyncLogging.hpp"
 
+#include <array>
 #include <cassert>
 #include <memory>
 
@@ -61,7 +62,7 @@ void AsyncLogging::threadCallback() {
 
         if (buffersToWrite.size() > 25) {
             // 考虑到当前端拼命发送日志消息，超过后端处理能力时（一般不会），会出现日志堆积情况，直接丢弃的堆积的日志，避免日志库本身故障
-            char buf[256]{};
+            std::array<char, 256> buf{};
             using namespace std::chrono;
             const auto now = system_clock::now();
             const auto tt = system_clock::to_time_t(now);
@@ -77,8 +78,8 @@ void AsyncLogging::threadCallback() {
             const int minute = tmTime.tm_min;
             const int second = tmTime.tm_sec;
             const long microsecond = us.count();
-            snprintf(buf,
-                     sizeof(buf),
+            snprintf(buf.data(),
+                     buf.size(),
                      "Dropped log messages at %04d-%02d-%02d %02d:%02d:%02d.%6ld, %zd larger buffers\n",
                      year,
                      month,
@@ -88,8 +89,8 @@ void AsyncLogging::threadCallback() {
                      second,
                      microsecond,
                      buffersToWrite.size() - 2);
-            fputs(buf, stderr);
-            logFile.append(buf, strlen(buf));
+            fputs(buf.data(), stderr);
+            logFile.append(buf.data(), strlen(buf.data()));
             buffersToWrite.erase(buffersToWrite.begin() + 2, buffersToWrite.end());
             // TODO: 其他处理日志堆积的措施
         }

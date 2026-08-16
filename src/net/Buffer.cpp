@@ -18,6 +18,7 @@
 #include "Buffer.hpp"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cassert>
 #include <string>
@@ -61,23 +62,23 @@ void Buffer::append(const Buffer& buffer) {
 // 从 fd 文件中读取数据到缓冲区，即往缓冲区中写入数据
 auto Buffer::readFd(const int fd) -> std::tuple<ssize_t, int> {
     int err = 0;
-    char stackBuffer[65536]{};
-    iovec vec[2]{};
+    std::array<char, 65536> stackBuffer{};
+    std::array<iovec, 2> vec{};
     const size_t writableBytes = writableSize();
     // 分散读，如果数据超出可写字节数，就把超出的部分先读到栈上，待重新调整缓冲区空间后再追加到缓冲区
     vec[0].iov_base = beginWrite();
     vec[0].iov_len = writableBytes;
-    vec[1].iov_base = stackBuffer;
-    vec[1].iov_len = sizeof(stackBuffer);
+    vec[1].iov_base = stackBuffer.data();
+    vec[1].iov_len = stackBuffer.size();
 
-    const ssize_t len = readv(fd, vec, 2);
+    const ssize_t len = readv(fd, vec.data(), static_cast<int>(vec.size()));
     if (len < 0) {
         err = errno;
     } else if (static_cast<size_t>(len) <= writableBytes) {
         writeOffset_ += len;
     } else {
         writeOffset_ = buffer_.size();
-        append(stackBuffer, len - writableBytes);
+        append(stackBuffer.data(), len - writableBytes);
     }
 
     return std::tuple{len, err};

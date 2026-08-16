@@ -1,4 +1,5 @@
 # clang-tidy 配置：聚焦正确性/生命周期/安全，避免风格噪音
+# 排除项：epoll (fd, events) 参数是标准用法；backtrace_symbols 必须手动 free（系统 API 固有模式）
 Checks: >
   -*,
   bugprone-*,
@@ -12,6 +13,9 @@ Checks: >
   -modernize-use-nodiscard,
   -modernize-avoid-c-arrays,
   readability-misleading-indentation,
+  -bugprone-easily-swappable-parameters,
+  -cppcoreguidelines-no-malloc,
+  -bugprone-multi-level-implicit-pointer-conversion,
   bugprone-use-after-move,
   bugprone-too-small-loop-variable,
   bugprone-suspicious-semicolon,

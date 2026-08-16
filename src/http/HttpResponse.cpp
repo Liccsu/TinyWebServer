@@ -17,6 +17,7 @@
 
 #include "HttpResponse.hpp"
 
+#include <array>
 #include <cassert>
 #include <climits>
 #include <cstring>
@@ -122,13 +123,13 @@ bool HttpResponse::resolveFile() {
 
     const std::string fullPath = srcDir_ + path_;
 
-    char resolved[PATH_MAX];
-    if (realpath(fullPath.c_str(), resolved) == nullptr) {
+    std::array<char, PATH_MAX> resolved{};
+    if (realpath(fullPath.c_str(), resolved.data()) == nullptr) {
         // 文件不存在
         code_ = 404;
         return false;
     }
-    const std::string realPath(resolved);
+    const std::string realPath(resolved.data());
 
     // 文档根（绝对路径，去掉尾部斜杠统一比较）
     std::string root = srcDir_;
@@ -136,9 +137,8 @@ bool HttpResponse::resolveFile() {
         root.pop_back();
     }
 
-    const bool insideRoot =
-        realPath == root ||
-        (realPath.size() > root.size() && realPath.compare(0, root.size(), root) == 0 && realPath[root.size()] == '/');
+    const bool insideRoot = realPath == root || (realPath.size() > root.size() && realPath.starts_with(root) &&
+                                                 realPath[root.size()] == '/');
     if (!insideRoot) {
         // 符号链接指向文档根之外（或路径逃逸）
         LOGW << "Path escapes document root: " << fullPath << " -> " << realPath;
@@ -146,7 +146,7 @@ bool HttpResponse::resolveFile() {
         return false;
     }
 
-    if (stat(resolved, &mmFileStat_) < 0) {
+    if (stat(resolved.data(), &mmFileStat_) < 0) {
         code_ = 404;
         return false;
     }
@@ -168,9 +168,9 @@ bool HttpResponse::resolveFile() {
         return true;
     }
 
-    const int srcFd = open(resolved, O_RDONLY | O_CLOEXEC);
+    const int srcFd = open(resolved.data(), O_RDONLY | O_CLOEXEC);
     if (srcFd < 0) {
-        LOGE << "open failed: " << resolved << " - " << strerror(errno);
+        LOGE << "open failed: " << resolved.data() << " - " << strerror(errno);
         code_ = 500;
         return false;
     }
@@ -178,7 +178,7 @@ bool HttpResponse::resolveFile() {
     void* mmRet = mmap(nullptr, static_cast<size_t>(mmFileStat_.st_size), PROT_READ, MAP_PRIVATE, srcFd, 0);
     close(srcFd);
     if (mmRet == MAP_FAILED) {
-        LOGE << "mmap failed: " << resolved << " - " << strerror(errno);
+        LOGE << "mmap failed: " << resolved.data() << " - " << strerror(errno);
         code_ = 500;
         return false;
     }

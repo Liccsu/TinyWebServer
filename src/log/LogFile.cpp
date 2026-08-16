@@ -17,6 +17,7 @@
 
 #include "LogFile.hpp"
 
+#include <array>
 #include <cstring>
 
 void LogFile::AppendFile::append(const char* data, const size_t size) {
@@ -61,16 +62,16 @@ std::string LogFile::getLogFileName(const std::string& baseName, time_t& now) {
     filename.reserve(baseName.size() + 64);
     filename = baseName;
 
-    char timeBuf[32];
+    std::array<char, 32> timeBuf{};
     tm timeInfo{};
     now = time(nullptr);
     localtime_r(&now, &timeInfo);
-    strftime(timeBuf, sizeof(timeBuf), ".%Y%m%d-%H%M%S.", &timeInfo);
-    filename += timeBuf;
+    strftime(timeBuf.data(), timeBuf.size(), ".%Y%m%d-%H%M%S.", &timeInfo);
+    filename += timeBuf.data();
 
-    char pidBuf[32];
-    snprintf(pidBuf, sizeof(pidBuf), "%d", getpid());
-    filename += pidBuf;
+    std::array<char, 32> pidBuf{};
+    snprintf(pidBuf.data(), pidBuf.size(), "%d", getpid());
+    filename += pidBuf.data();
 
     filename += ".log";
 

@@ -80,7 +80,7 @@ site:
 Config::Config(const std::string& path) {
     // 如果配置文件不存在则创建默认配置文件
     if (const std::filesystem::path & file_path(std::filesystem::absolute(path)); !exists(file_path)) {
-        std::cout << file_path << " is not exists, will be created" << std::endl;
+        std::cout << file_path << " is not exists, will be created" << '\n';
         create_default_config(file_path);
     }
     std::ifstream file(path);

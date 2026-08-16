@@ -34,8 +34,9 @@ WebServer::WebServer()
       timer_(new TimerHeap()),
       threadPool_(new ThreadPool(configuredThreadCount())) {
     // 请求大小限制（可选配置；缺省使用安全默认值）
-    HttpRequest::maxBodySize = Config::getWithDefault<size_t>("server.max_body_size", 1024 * 1024);
-    HttpRequest::maxRequestSize = Config::getWithDefault<size_t>("server.max_request_size", 8 * 1024 * 1024);
+    HttpRequest::maxBodySize = Config::getWithDefault<size_t>("server.max_body_size", static_cast<size_t>(1024) * 1024);
+    HttpRequest::maxRequestSize =
+        Config::getWithDefault<size_t>("server.max_request_size", static_cast<size_t>(8) * 1024 * 1024);
 
     const auto sitePath = Config::get<std::string>("site.path");
     if (sitePath.empty()) {
@@ -91,7 +92,7 @@ WebServer::WebServer()
     if (port <= 0 || port > 65535) {
         throw std::runtime_error("config: server.port 必须在 1-65535 之间，当前值: " + std::to_string(port));
     }
-    const std::string host = Config::getWithDefault<std::string>("server.host", "0.0.0.0");
+    const auto host = Config::getWithDefault<std::string>("server.host", "0.0.0.0");
     maxConnections_ = Config::getWithDefault<int>("server.max_connections", 65536);
     if (maxConnections_ <= 0) {
         throw std::runtime_error("config: server.max_connections 必须为正数，当前值: " +

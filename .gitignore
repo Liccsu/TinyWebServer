@@ -192,3 +192,4 @@ cscope.po.out
 /build*/
 /log/
 /config/config.yml
+/.cache

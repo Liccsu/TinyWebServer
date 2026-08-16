@@ -15,6 +15,7 @@
  * liccsu@163.com
  */
 
+#include <array>
 #include <atomic>
 #include <csignal>
 #include <cstdio>
@@ -35,11 +36,11 @@ static void gracefulShutdownHandler([[maybe_unused]] const int signum) {
 
 void segv_signal_handler(const int signum) {
     static constexpr size_t BACKTRACE_SIZE = 256;
-    void* buffer[BACKTRACE_SIZE] = {nullptr};
+    std::array<void*, BACKTRACE_SIZE> buffer{};
 
     fprintf(stderr, "\n>>>>>>>>> Catch Signal [%d] <<<<<<<<<\n", signum);
-    const int nptrs = backtrace(buffer, BACKTRACE_SIZE);
-    char** strings = backtrace_symbols(buffer, nptrs);
+    const int nptrs = backtrace(buffer.data(), static_cast<int>(buffer.size()));
+    char** strings = backtrace_symbols(buffer.data(), nptrs);
     if (!strings) {
         fprintf(stderr, "backtrace_symbols() error");
         exit(-1);
@@ -82,7 +83,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] const char* argv[]) {
         g_server.store(nullptr, std::memory_order_release);
     } catch (const std::exception& e) {
         // 配置错误/初始化失败等：给出明确、可定位的错误信息并返回非 0 退出码
-        std::cerr << "FATAL: " << e.what() << std::endl;
+        std::cerr << "FATAL: " << e.what() << '\n';
         return 1;
     }
 

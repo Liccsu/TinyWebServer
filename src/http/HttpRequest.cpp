@@ -18,6 +18,7 @@
 #include "HttpRequest.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstring>
 #include <filesystem>
@@ -313,7 +314,7 @@ bool HttpRequest::userVerify(const std::string& name, const std::string& pwd, co
         return false;
     }
 
-    MYSQL_BIND bind[2]{};
+    std::array<MYSQL_BIND, 2> bind{};
     my_bool name_is_null = 0;
     my_bool pwd_is_null = 0;
 
@@ -323,7 +324,7 @@ bool HttpRequest::userVerify(const std::string& name, const std::string& pwd, co
     bind[0].buffer_length = name.length();
     bind[0].is_null = &name_is_null;
 
-    if (mysql_stmt_bind_param(stmt, bind)) {
+    if (mysql_stmt_bind_param(stmt, bind.data())) {
         LOGE << "mysql_stmt_bind_param failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
         return false;
@@ -336,24 +337,24 @@ bool HttpRequest::userVerify(const std::string& name, const std::string& pwd, co
     }
 
     // 绑定结果集
-    std::memset(bind, 0, sizeof(bind));
-    char db_username[256]{};
-    char db_password[256]{};
+    std::memset(bind.data(), 0, bind.size() * sizeof(MYSQL_BIND));
+    std::array<char, 256> db_username{};
+    std::array<char, 256> db_password{};
     unsigned long username_length = 0;
     unsigned long password_length = 0;
     bind[0].buffer_type = MYSQL_TYPE_STRING;
-    bind[0].buffer = db_username;
-    bind[0].buffer_length = sizeof(db_username);
+    bind[0].buffer = db_username.data();
+    bind[0].buffer_length = db_username.size();
     bind[0].length = &username_length;
     bind[0].is_null = &name_is_null;
 
     bind[1].buffer_type = MYSQL_TYPE_STRING;
-    bind[1].buffer = db_password;
-    bind[1].buffer_length = sizeof(db_password);
+    bind[1].buffer = db_password.data();
+    bind[1].buffer_length = db_password.size();
     bind[1].length = &password_length;
     bind[1].is_null = &pwd_is_null;
 
-    if (mysql_stmt_bind_result(stmt, bind)) {
+    if (mysql_stmt_bind_result(stmt, bind.data())) {
         LOGE << "mysql_stmt_bind_result failed: " << mysql_stmt_error(stmt);
         mysql_stmt_close(stmt);
         return false;
@@ -366,7 +367,7 @@ bool HttpRequest::userVerify(const std::string& name, const std::string& pwd, co
     }
 
     while (mysql_stmt_fetch(stmt) == 0) {
-        std::string password(db_password, password_length);
+        std::string password(db_password.data(), password_length);
         // 登陆行为 且 密码正确
         if (isLogin) {
             if (pwd == password) {
@@ -401,7 +402,7 @@ bool HttpRequest::userVerify(const std::string& name, const std::string& pwd, co
             return false;
         }
 
-        MYSQL_BIND insert_bind[2]{};
+        std::array<MYSQL_BIND, 2> insert_bind{};
 
         // 绑定用户名
         insert_bind[0].buffer_type = MYSQL_TYPE_STRING;
@@ -415,7 +416,7 @@ bool HttpRequest::userVerify(const std::string& name, const std::string& pwd, co
         insert_bind[1].buffer_length = pwd.length();
         insert_bind[1].is_null = &pwd_is_null;
 
-        if (mysql_stmt_bind_param(stmt, insert_bind)) {
+        if (mysql_stmt_bind_param(stmt, insert_bind.data())) {
             LOGE << "mysql_stmt_bind_param failed: " << mysql_stmt_error(stmt);
             mysql_stmt_close(stmt);
             return false;
@@ -470,14 +471,14 @@ bool HttpRequest::validateContentLength() {
         statusCode_ = 400;
         return false;
     }
-    if (value.empty() || !std::all_of(value.begin(), value.end(), [](unsigned char c) { return std::isdigit(c); })) {
+    if (value.empty() || !std::ranges::all_of(value, [](unsigned char c) { return std::isdigit(c); })) {
         statusCode_ = 400;
         return false;
     }
 
     size_t length = 0;
     for (const char c : value) {
-        const size_t digit = static_cast<size_t>(c - '0');
+        const auto digit = static_cast<size_t>(c - '0');
         if (length > (maxBodySize - digit) / 10) {
             // 溢出或超过上限 -> 413
             statusCode_ = 413;
@@ -501,8 +502,7 @@ bool HttpRequest::isChunked() const {
     }
     // 值统一小写后检测 chunked（含 "gzip, chunked" 等组合）
     std::string value = it->second;
-    std::transform(
-        value.begin(), value.end(), value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+    std::ranges::transform(value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     return value.find("chunked") != std::string::npos;
 }
 
@@ -638,7 +638,7 @@ ParseResult HttpRequest::parse(Buffer& buff) {
             }
             return ParseResult::NeedMore;
         }
-        const size_t lineLen = static_cast<size_t>(lineEnd - buff.peek());
+        const auto lineLen = static_cast<size_t>(lineEnd - buff.peek());
         if (lineLen > maxHeaderLine) {
             statusCode_ = 413;
             return ParseResult::Error;
@@ -725,9 +725,8 @@ bool HttpRequest::isKeepAlive() const {
     if (const auto it = headers_.find("connection"); it != headers_.end()) {
         // 值可能为逗号分隔的多个 token（如 "keep-alive, Upgrade"）
         std::string value = it->second;
-        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char c) {
-            return static_cast<char>(std::tolower(c));
-        });
+        std::ranges::transform(
+            value, value.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
         // 精确匹配逗号分隔的 token 列表
         size_t begin = 0;
         while (begin <= value.size()) {
