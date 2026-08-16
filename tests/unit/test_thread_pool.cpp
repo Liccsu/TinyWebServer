@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 
 #include <atomic>
-#include <chrono>
 #include <future>
 #include <stdexcept>
 #include <thread>

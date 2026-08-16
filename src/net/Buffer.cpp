@@ -19,7 +19,6 @@
 
 #include <algorithm>
 #include <array>
-#include <atomic>
 #include <cassert>
 #include <string>
 #include <sys/uio.h>

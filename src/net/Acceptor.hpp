@@ -18,9 +18,7 @@
 #ifndef TINYWEBSERVER_ACCEPTOR_HPP
 #define TINYWEBSERVER_ACCEPTOR_HPP
 
-#include <netinet/in.h>
 #include <string>
-#include <utility>
 
 // 监听与接受新连接（仅主线程使用）。
 // RAII：构造时创建非阻塞监听 socket 并 bind/listen，析构时关闭。

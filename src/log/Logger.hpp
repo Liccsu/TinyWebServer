@@ -26,7 +26,6 @@
 #include <mutex>
 #include <string>
 #include <sys/syscall.h>
-#include <thread>
 #include <unistd.h>
 #include <unordered_map>
 

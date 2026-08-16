@@ -17,6 +17,10 @@
 
 #include "SqlConnPool.hpp"
 
+#include "../log/Logger.hpp"
+
+#include "../config/Config.hpp"
+
 #include <mysql/mysqld_error.h>
 
 SqlConnPool::SqlConnPool() {

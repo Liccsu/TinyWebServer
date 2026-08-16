@@ -27,7 +27,6 @@
 #include <string>
 #include <thread>
 
-#include "../config/Config.hpp"
 #include "../log/Logger.hpp"
 
 // 自定义删除器，用于确保连接被正确关闭

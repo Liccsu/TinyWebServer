@@ -17,6 +17,8 @@
 
 #include "HttpConnection.hpp"
 
+#include "../log/Logger.hpp"
+
 #include <cassert>
 #include <chrono>
 #include <sys/uio.h>

@@ -17,6 +17,8 @@
 
 #include "HttpRequest.hpp"
 
+#include "../log/Logger.hpp"
+
 #include <algorithm>
 #include <array>
 #include <cctype>

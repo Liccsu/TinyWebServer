@@ -17,11 +17,11 @@
 
 #include "WebServer.hpp"
 
+#include "../log/Logger.hpp"
+
 #include <chrono>
 #include <filesystem>
 #include <stdexcept>
-#include <sys/epoll.h>
-#include <sys/eventfd.h>
 #include <thread>
 #include <unistd.h>
 

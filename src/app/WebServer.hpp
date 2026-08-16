@@ -19,11 +19,9 @@
 #define TINYWEBSERVER_WEBSERVER_HPP
 
 #include <atomic>
-#include <cstdint>
 #include <memory>
 #include <string>
 
-#include "../http/HttpConnection.hpp"
 #include "../log/AsyncLogging.hpp"
 #include "../net/Acceptor.hpp"
 #include "../net/Epoller.hpp"

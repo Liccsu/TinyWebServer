@@ -1,0 +1,17 @@
+# clangd 配置：与 .clang-tidy 检查集对齐，确保编辑器诊断与 CI 一致
+CompileFlags:
+  # 编译数据库目录（相对项目根）；Windows 编辑器亦可用
+  CompilationDatabase: build
+
+Diagnostics:
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - clang-analyzer-*
+      - performance-*
+      - modernize-*
+    # 与 .clang-tidy 一致：系统 API 固有模式不视为问题
+    Remove:
+      - bugprone-easily-swappable-parameters
+      - cppcoreguidelines-no-malloc
+      - bugprone-multi-level-implicit-pointer-conversion

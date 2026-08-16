@@ -21,7 +21,6 @@
 #include <array>
 #include <cassert>
 #include <ctime>
-#include <iostream>
 #include <memory>
 #include <mutex>
 #include <string>
