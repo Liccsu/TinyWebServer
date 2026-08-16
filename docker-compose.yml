@@ -1,0 +1,22 @@
+# MariaDB 依赖服务（登录/注册功能需要；纯静态文件服务可不依赖）
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: tws-mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: example_root_pwd
+      MARIADB_DATABASE: tiny_web_server_db
+      MARIADB_USER: tws
+      MARIADB_PASSWORD: example_pwd
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - tws_mariadb_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  tws_mariadb_data:

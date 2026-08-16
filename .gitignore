@@ -187,3 +187,8 @@ cscope.in.out
 cscope.po.out
 
 
+
+# 本地构建与运行产物
+/build*/
+/log/
+/config/config.yml

@@ -1,0 +1,40 @@
+---
+# clang-format 配置（LLVM 风格基础上微调）
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++20
+
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ColumnLimit: 120
+
+# 访问修饰符缩进
+AccessModifierOffset: -4
+
+# 换行风格
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# 指针/引用靠左
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+# 命名空间与头文件
+NamespaceIndentation: None
+SortIncludes: CaseSensitive
+
+# 参数与初始化列表
+BinPackArguments: false
+BinPackParameters: false
+PackConstructorInitializers: Never
+ConstructorInitializerIndentWidth: 4
+
+# 其他
+IncludeBlocks: Preserve
+DerivePointerAlignment: false
+MaxEmptyLinesToKeep: 1
+SeparateDefinitionBlocks: Leave
+SpaceAfterCStyleCast: false
+SpaceBeforeParens: ControlStatements

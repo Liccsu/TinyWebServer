@@ -1,0 +1,54 @@
+# 配置示例：server 段必填项缺一不可（缺少任一键都会导致启动失败并给出明确错误）；
+# 可选键（host/threads/max_connections/max_request_size/max_body_size）缺失时使用内置默认值。
+
+server:
+    # 监听地址（IPv4；"0.0.0.0" 或空串 = 所有接口）[可选，默认 0.0.0.0]
+    host: 0.0.0.0
+    # 监听端口（1-65535）
+    port: 6666
+    # 连接超时时间（空闲即断开），单位毫秒；0 表示不超时
+    timeout: 60000
+    # 工作线程数；0 或缺失 = 自动（2x CPU 核数）[可选]
+    threads: 0
+    # 最大并发连接数 [可选，默认 65536]
+    max_connections: 65536
+    # 单请求读缓冲上限（字节）[可选，默认 8 MiB]
+    max_request_size: 8388608
+    # 请求体大小上限（字节）[可选，默认 1 MiB]
+    max_body_size: 1048576
+
+mysql:
+    # MySQL/MariaDB HOST
+    host: 127.0.0.1
+    # 端口
+    port: 3306
+    # 用户名
+    user: root
+    # 密码（仅本机配置使用；生产环境建议通过环境变量注入）
+    password: 123456
+    # 数据库名（不存在时自动创建）
+    db: tiny_web_server_db
+    # 连接池初始大小
+    pool_size: 12
+    # 连接池最低大小
+    pool_min_size: 6
+    # 连接池最高大小
+    pool_max_size: 24
+
+log:
+    # 日志文件输出目录
+    directory: ./log
+    # 日志输出级别 1:debug 2:info 3:warning 4:error 5:none
+    level: 2
+    # 单个日志文件大小限制，单位 MB
+    size: 64
+    # 日志文件名 (base name)
+    basename: tiny_web_server
+    # 是否输出彩色（输出到文件时建议关闭）
+    colorful: false
+    # 是否输出到文件 true:输出到文件 false:输出到终端
+    output_to_file: true
+
+site:
+    # 静态网站目录（必须存在，启动时校验）
+    path: ./dist

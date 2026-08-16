@@ -1,0 +1,8 @@
+# 构建上下文排除：本地产物与大文件
+.git/
+build/
+build-*/
+log/
+config/config.yml
+docs/
+*.log
