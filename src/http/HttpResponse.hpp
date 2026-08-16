@@ -36,7 +36,7 @@ class HttpResponse {
 
     // mmap 的文件内容与元信息；HEAD 请求不 mmap（仅记录大小）
     char* mmFile_ = nullptr;
-    struct stat mmFileStat_{};
+    struct stat mmFileStat_ = {};
 
     // 内置错误页 HTML（不依赖磁盘文件，保证错误响应永远可用）
     std::string errorBody_;

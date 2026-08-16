@@ -68,7 +68,7 @@ int main([[maybe_unused]] const int argc, [[maybe_unused]] const char* argv[]) {
 #endif
 
     // 优雅退出：SIGINT（Ctrl-C）/ SIGTERM（systemd stop 等）触发
-    struct sigaction sa{};
+    struct sigaction sa = {};
     sa.sa_handler = gracefulShutdownHandler;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;

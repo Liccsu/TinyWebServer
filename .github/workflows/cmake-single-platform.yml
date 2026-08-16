@@ -20,7 +20,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libmariadb-dev libmariadb-dev-compat \
-            ninja-build clang-format clang-tidy
+            ninja-build clang-format-19
 
       - name: Configure (Release + tests)
         run: cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -G Ninja -DENABLE_WERROR=ON
@@ -32,9 +32,9 @@ jobs:
         working-directory: build
         run: ctest --output-on-failure
 
-      - name: Check formatting
+      - name: Check formatting (clang-format-19, 与本地开发环境一致)
         run: |
-          find src tests -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run --Werror
+          find src tests -name '*.cpp' -o -name '*.hpp' | xargs clang-format-19 --dry-run --Werror
 
   sanitizer:
     runs-on: ubuntu-latest
