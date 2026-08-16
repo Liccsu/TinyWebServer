@@ -18,6 +18,7 @@
 #ifndef TINYWEBSERVER_LOGFILE_HPP
 #define TINYWEBSERVER_LOGFILE_HPP
 
+#include <array>
 #include <cassert>
 #include <ctime>
 #include <iostream>
@@ -30,7 +31,7 @@
 class LogFile {
     class AppendFile {
         FILE* fp_;
-        char buffer_[64 * 1024]{};
+        std::array<char, static_cast<size_t>(64) * 1024> buffer_{};
         size_t writtenBytes_{};
 
         size_t write(const char* data, const size_t size) const { return fwrite_unlocked(data, 1, size, fp_); }
@@ -39,7 +40,7 @@ class LogFile {
         explicit AppendFile(const std::string& fileName)
             : fp_(fopen(fileName.c_str(), "ae")) {
             assert(fp_);
-            setbuffer(fp_, buffer_, sizeof(buffer_));
+            setbuffer(fp_, buffer_.data(), buffer_.size());
         }
 
         ~AppendFile() { fclose(fp_); }

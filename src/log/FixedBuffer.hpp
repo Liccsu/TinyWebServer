@@ -18,24 +18,25 @@
 #ifndef TINYWEBSERVER_FIXEDBUFFER_HPP
 #define TINYWEBSERVER_FIXEDBUFFER_HPP
 
+#include <array>
 #include <cstddef>
 #include <cstring>
 
 inline static constexpr size_t SmallBufferSize = 4096;
-inline static constexpr size_t LargeBufferSize = 4096 * 1000;
+inline static constexpr size_t LargeBufferSize = static_cast<size_t>(4096) * 1000;
 
 template <const size_t SIZE> class FixedBuffer {
-    char data_[SIZE]{};
+    std::array<char, SIZE> data_{};
     char* cur_;
 
     [[nodiscard]]
     const char* end() const {
-        return data_ + sizeof(data_);
+        return data_.data() + data_.size();
     }
 
 public:
     FixedBuffer()
-        : cur_(data_) {}
+        : cur_(data_.data()) {}
 
     ~FixedBuffer() = default;
 
@@ -59,20 +60,20 @@ public:
     }
 
     void clear() {
-        memset(data_, 0, sizeof(data_));
-        cur_ = data_;
+        memset(data_.data(), 0, data_.size());
+        cur_ = data_.data();
     }
 
     void add(const size_t len) { cur_ += len; }
 
     [[nodiscard]]
     const char* data() const {
-        return data_;
+        return data_.data();
     }
 
     [[nodiscard]]
     size_t len() const {
-        return cur_ - data_;
+        return cur_ - data_.data();
     }
 
     [[nodiscard]]

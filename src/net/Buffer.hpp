@@ -45,7 +45,7 @@ class Buffer {
 
 public:
     Buffer()
-        : Buffer(64 * 1024) {}
+        : Buffer(static_cast<size_t>(64) * 1024) {}
 
     explicit Buffer(const size_t initSize)
         : buffer_(initSize) {}

@@ -61,7 +61,7 @@ class ThreadPool {
 
 public:
     ThreadPool()
-        : ThreadPool(std::thread::hardware_concurrency() * 2) {}
+        : ThreadPool(static_cast<size_t>(std::thread::hardware_concurrency()) * 2) {}
 
     explicit ThreadPool(const size_t nThreads)
         : threads_(nThreads > 0 ? nThreads : 8) {
@@ -113,8 +113,11 @@ public:
     template <typename F, typename... Args>
     auto submit(F&& f, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>> {
         using ReturnType = std::invoke_result_t<F, Args...>;
-        auto func = std::bind(std::forward<F>(f), std::forward<Args>(args)...);
-        auto taskPtr = std::make_shared<std::packaged_task<ReturnType()>>(func);
+        // 用 lambda 捕获替代 std::bind（C++20 init-capture pack），语义更清晰
+        auto func = [f = std::forward<F>(f), ... boundArgs = std::forward<Args>(args)]() mutable -> ReturnType {
+            return std::invoke(f, boundArgs...);
+        };
+        auto taskPtr = std::make_shared<std::packaged_task<ReturnType()>>(std::move(func));
         const std::function<void()> wrapperFunc = [taskPtr] { (*taskPtr)(); };
         if (!queue_.push(wrapperFunc)) {
             // 队列已 shutdown：返回永不就绪的 future

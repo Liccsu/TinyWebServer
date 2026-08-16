@@ -18,7 +18,9 @@
 #ifndef TINYWEBSERVER_LOGGER_HPP
 #define TINYWEBSERVER_LOGGER_HPP
 
+#include <array>
 #include <atomic>
+#include <cstdint>
 #include <cstdio>
 #include <functional>
 #include <mutex>
@@ -35,7 +37,7 @@
 #define __FILE_NAME__ __FILE__
 #endif
 
-enum class LogLevel { Default, Debug, Info, Warning, Error, None };
+enum class LogLevel : std::uint8_t { Default, Debug, Info, Warning, Error, None };
 
 class Logger {
     using OutputCallback = std::function<void(const char*, size_t)>;
@@ -43,7 +45,7 @@ class Logger {
 
     class Impl {
         inline static thread_local long tid_;
-        inline static thread_local char tidStr_[8];
+        inline static thread_local std::array<char, 8> tidStr_;
         const char* fileName_;
         const int line_;
         const LogLevel logLevel_;
@@ -66,9 +68,9 @@ class Logger {
             formatNowTime();
             if (tid_ == 0) {
                 tid_ = syscall(SYS_gettid);
-                std::snprintf(tidStr_, sizeof(tidStr_), "%5ld", tid_);
+                std::snprintf(tidStr_.data(), tidStr_.size(), "%5ld", tid_);
             }
-            logStream_ << ' ' << tidStr_ << ' ' << logLevelTag() << ": ";
+            logStream_ << ' ' << tidStr_.data() << ' ' << logLevelTag() << ": ";
         }
 
         ~Impl() {

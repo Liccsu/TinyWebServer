@@ -18,12 +18,13 @@
 #ifndef TINYWEBSERVER_FMT_HPP
 #define TINYWEBSERVER_FMT_HPP
 
+#include <array>
 #include <cstdio>
 #include <type_traits>
 #include <utility>
 
 class Fmt {
-    char buf_[64]{};
+    std::array<char, 64> buf_{};
     size_t length_;
 
 public:
@@ -31,12 +32,12 @@ public:
     [[maybe_unused]]
     Fmt(const char* format, T&& value) {
         static_assert(std::is_arithmetic_v<T>, "Must be arithmetic type");
-        length_ = std::snprintf(buf_, sizeof(buf_), format, std::forward<T>(value));
+        length_ = std::snprintf(buf_.data(), buf_.size(), format, std::forward<T>(value));
     }
 
     [[nodiscard]]
     const char* data() const {
-        return buf_;
+        return buf_.data();
     }
 
     [[nodiscard]]

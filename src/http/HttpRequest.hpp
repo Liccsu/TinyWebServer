@@ -18,6 +18,7 @@
 #ifndef TINYWEBSERVER_HTTPREQUEST_HPP
 #define TINYWEBSERVER_HTTPREQUEST_HPP
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -29,21 +30,21 @@
 //   Ok       - 一个完整请求已解析完成（可生成响应）
 //   NeedMore - 当前缓冲数据不完整，等待更多数据到达（绝不能误报 400）
 //   Error    - 请求非法，通过 statusCode() 获取应返回的状态码（400/405/413/414/501）
-enum class ParseResult { Ok, NeedMore, Error };
+enum class ParseResult : std::uint8_t { Ok, NeedMore, Error };
 
 class HttpRequest {
-    enum class ParseState { ParseLine, ParseHeaders, ParseContent, ParseFinish };
+    enum class ParseState : std::uint8_t { ParseLine, ParseHeaders, ParseContent, ParseFinish };
 
 public:
     // 服务器支持的方法白名单；其余方法显式返回 405，绝不按 GET 处理
-    enum class Method { Get, Post, Head };
+    enum class Method : std::uint8_t { Get, Post, Head };
 
-    enum class Version { Unknown, Http10, Http11 };
+    enum class Version : std::uint8_t { Unknown, Http10, Http11 };
 
 private:
-    ParseState state_;
-    Method method_;
-    Version version_;
+    ParseState state_ = ParseState::ParseLine;
+    Method method_ = Method::Get;
+    Version version_ = Version::Http11;
     // path_ / query_ / content_ 均已做 URL 解码
     std::string path_, query_, content_;
     std::unordered_map<std::string, std::string> headers_;
@@ -94,19 +95,14 @@ private:
     bool isChunked() const;
 
 public:
-    HttpRequest()
-        : state_(ParseState::ParseLine),
-          method_(Method::Get),
-          version_(Version::Http11),
-          statusCode_(200),
-          contentLength_(0) {}
+    HttpRequest() = default;
 
     // 配置化请求限制（单位：字节）。WebServer 启动时可按配置覆盖。
-    inline static size_t maxUriLength = 8192;              // 请求行总长度上限
-    inline static size_t maxHeaderLine = 8192;             // 单行 Header 上限
-    inline static size_t maxHeaderCount = 100;             // Header 数量上限
-    inline static size_t maxBodySize = 1024 * 1024;        // 请求体上限（1 MiB）
-    inline static size_t maxRequestSize = 8 * 1024 * 1024; // 单连接读缓冲上限（8 MiB）
+    inline static size_t maxUriLength = 8192;                                   // 请求行总长度上限
+    inline static size_t maxHeaderLine = 8192;                                  // 单行 Header 上限
+    inline static size_t maxHeaderCount = 100;                                  // Header 数量上限
+    inline static size_t maxBodySize = static_cast<size_t>(1024) * 1024;        // 请求体上限（1 MiB）
+    inline static size_t maxRequestSize = static_cast<size_t>(8) * 1024 * 1024; // 单连接读缓冲上限（8 MiB）
 
     // 重置解析状态，供 keep-alive 连接复用
     void clear();

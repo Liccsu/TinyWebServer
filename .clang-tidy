@@ -26,7 +26,7 @@ Checks: >
   bugprone-exception-escape
 
 WarningsAsErrors: '*'
-HeaderFilterRegex: '^src/'
+HeaderFilterRegex: 'src/'
 FormatStyle: file
 
 CheckOptions:

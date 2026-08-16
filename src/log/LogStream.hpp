@@ -19,6 +19,7 @@
 #define TINYWEBSERVER_LOGSTREAM_HPP
 
 #include <algorithm>
+#include <array>
 #include <charconv>
 #include <concepts>
 #include <cstdint>
@@ -34,15 +35,18 @@ class LogStream {
 
     static constexpr size_t MaxNumericSize = 48;
 
-    static constexpr char digits[] = "9876543210123456789";
-    static_assert(sizeof(digits) == 20, "wrong number of digits");
+    static constexpr std::array<char, 20> digits = {'9', '8', '7', '6', '5', '4', '3', '2', '1', '0',
+                                                    '1', '2', '3', '4', '5', '6', '7', '8', '9', '\0'};
+    static_assert(digits.size() == 20, "wrong number of digits");
 
-    static constexpr const char* const number = digits + 9;
+    static constexpr const char* const number = digits.data() + 9;
 
-    static constexpr char digitsHex[] = "FEDCBA9876543210123456789ABCDEF";
-    static_assert(sizeof(digitsHex) == 32, "wrong number of digitsHex");
+    static constexpr std::array<char, 32> digitsHex = {'F', 'E', 'D', 'C', 'B', 'A', '9', '8', '7', '6', '5',
+                                                       '4', '3', '2', '1', '0', '1', '2', '3', '4', '5', '6',
+                                                       '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', '\0'};
+    static_assert(digitsHex.size() == 32, "wrong number of digitsHex");
 
-    static constexpr const char* const numberHex = digitsHex + 15;
+    static constexpr const char* const numberHex = digitsHex.data() + 15;
 
     LogBuffer logBuffer_;
 

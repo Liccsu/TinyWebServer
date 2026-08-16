@@ -64,7 +64,7 @@ auto HttpConnection::write() -> std::tuple<ssize_t, int> {
     int err = 0;
     do {
         // 将 iov 的内容写到 fd
-        const ssize_t size = writev(fd_, iov_, iovCnt_);
+        const ssize_t size = writev(fd_, iov_.data(), iovCnt_);
         len = size;
         if (size < 0) {
             err = errno;

@@ -19,6 +19,7 @@
 #define TINYWEBSERVER_HTTPCONNECTION_H
 
 #include <arpa/inet.h>
+#include <array>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
@@ -53,7 +54,7 @@ class HttpConnection {
     std::condition_variable taskCv_;
 
     int iovCnt_{};
-    iovec iov_[2]{};
+    std::array<iovec, 2> iov_{};
 
     // 读缓冲区
     Buffer readBuff_;
