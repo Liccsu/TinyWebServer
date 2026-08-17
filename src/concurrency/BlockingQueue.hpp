@@ -25,7 +25,7 @@
 #include <optional>
 #include <queue>
 
-// 有界阻塞队列（MPSC 语义）。
+// 有界阻塞队列（MPMC 语义：多生产者 push、多消费者 pop，均受同一互斥量保护）。
 // shutdown() 后所有阻塞的 push/pop/front/back 立即返回：
 //   - pop/front/back 返回 std::nullopt
 //   - push 不再入队并返回 false

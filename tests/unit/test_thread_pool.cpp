@@ -71,6 +71,31 @@ TEST(ThreadPoolTest, SubmitAfterShutdownReturnsInvalidFuture) {
     EXPECT_FALSE(fut.valid());
 }
 
+TEST(ThreadPoolTest, ExcessiveThreadCountClamped) {
+    // 防线程风暴：超限配置被收敛（上限 256），池仍可用
+    ThreadPool pool(100000);
+    auto fut = pool.submit([] { return 7; });
+    EXPECT_EQ(fut.get(), 7);
+}
+
+TEST(ThreadPoolTest, ZeroThreadCountFallsBack) {
+    // 0 线程配置回退默认 8
+    ThreadPool pool(0);
+    auto fut = pool.submit([] { return 3; });
+    EXPECT_EQ(fut.get(), 3);
+}
+
+TEST(ThreadPoolTest, MoveOnlyCaptureSupported) {
+    ThreadPool pool(2);
+    // 参数包路径：move-only 参数
+    auto fut = pool.submit([](std::unique_ptr<int> p) { return *p; }, std::make_unique<int>(42));
+    EXPECT_EQ(fut.get(), 42);
+    // 捕获变量路径：move-only lambda 整体
+    auto u = std::make_unique<int>(7);
+    auto fut2 = pool.submit([u = std::move(u)] { return *u; });
+    EXPECT_EQ(fut2.get(), 7);
+}
+
 TEST(ThreadPoolTest, ConcurrentSubmitStress) {
     ThreadPool pool(8);
     std::atomic<int> counter{0};

@@ -5,6 +5,9 @@ CompileFlags:
   CompilationDatabase: build
 
 Diagnostics:
+  # IncludeCleaner 不尊重 NOLINT 注释，只能在 clangd 层面抑制
+  Suppress:
+    - unused-includes
   ClangTidy:
     Add:
       - bugprone-*

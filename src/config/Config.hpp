@@ -23,8 +23,6 @@
 #include <stdexcept>
 #include <string>
 
-// yaml.h 提供成员类型 YAML::Node 与 _get 模板实现所需完整定义；
-// include-cleaner 对成员声明中的类型引用误判为未使用，此处显式抑制
 // NOLINTNEXTLINE(misc-include-cleaner)
 #include "yaml-cpp/yaml.h"
 
