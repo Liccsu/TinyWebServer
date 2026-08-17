@@ -14,6 +14,7 @@ TEST(ThreadPoolTest, ExecutesSubmittedTasks) {
     ThreadPool pool(4);
     std::atomic<int> counter{0};
     std::vector<std::future<void>> futures;
+    futures.reserve(100);
     for (int i = 0; i < 100; ++i) {
         futures.push_back(pool.submit([&] { counter.fetch_add(1); }));
     }
@@ -76,6 +77,7 @@ TEST(ThreadPoolTest, ConcurrentSubmitStress) {
     constexpr int kThreads = 8;
     constexpr int kPerThread = 200;
     std::vector<std::thread> producers;
+    producers.reserve(kThreads);
     for (int t = 0; t < kThreads; ++t) {
         producers.emplace_back([&] {
             for (int i = 0; i < kPerThread; ++i) {

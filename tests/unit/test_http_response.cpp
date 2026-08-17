@@ -42,7 +42,7 @@ protected:
         Buffer buff;
         resp.init(root_.string(), path, keepAlive, code, isHead);
         resp.makeResponse(buff);
-        return std::string(buff.peek(), buff.readableSize());
+        return {buff.peek(), buff.readableSize()};
     }
 };
 
@@ -116,7 +116,7 @@ TEST_F(HttpResponseTest, SymlinkInsideRootAllowed) {
     fs::create_symlink(root_ / "secret.txt", root_ / "link_inside.txt", ec);
     if (!ec) {
         HttpResponse resp;
-        const std::string raw = makeResponse(resp, "/link_inside.txt");
+        makeResponse(resp, "/link_inside.txt");
         EXPECT_EQ(resp.code(), 200);
         EXPECT_EQ(std::string(resp.file(), resp.fileLen()), "TOP SECRET");
         resp.unmapFile();
@@ -208,7 +208,7 @@ TEST_F(HttpResponseTest, InitReuseUnmapsPrevious) {
     const char* firstFile = resp.file();
     ASSERT_NE(firstFile, nullptr);
     // 同一 response 对象复用：旧的 mmap 被释放，新文件映射
-    const std::string raw = makeResponse(resp, "/big.bin");
+    makeResponse(resp, "/big.bin");
     EXPECT_EQ(resp.code(), 200);
     EXPECT_NE(resp.file(), nullptr);
     EXPECT_NE(resp.file(), firstFile);

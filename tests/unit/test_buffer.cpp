@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <array>
 #include <string>
 
 #include "net/Buffer.hpp"
@@ -64,8 +65,8 @@ TEST(BufferTest, AppendBuffer) {
 
 TEST(BufferTest, ReadFdFromPipe) {
     // 用管道模拟 socket fd 的 readv 路径（payload 小于管道缓冲，避免写阻塞）
-    int fds[2];
-    ASSERT_EQ(pipe(fds), 0);
+    std::array<int, 2> fds{};
+    ASSERT_EQ(pipe(fds.data()), 0);
     const std::string payload(30000, 'q');
     ASSERT_EQ(write(fds[1], payload.data(), payload.size()), static_cast<ssize_t>(payload.size()));
 

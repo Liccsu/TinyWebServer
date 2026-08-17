@@ -9,7 +9,7 @@ namespace {
 
 // 将 LogStream 缓冲内容提取为字符串
 std::string streamToString(LogStream& stream) {
-    return std::string(stream.buffer().data(), stream.buffer().len());
+    return {stream.buffer().data(), stream.buffer().len()};
 }
 
 } // namespace
